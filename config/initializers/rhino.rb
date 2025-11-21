@@ -21,5 +21,14 @@ Rhino.setup do |config|
 
   # The list of resources exposed in the API
   config.resources += [ "User", "Account" ]
-  config.resources += ["Organization", "UsersRole", "Role", "UsersRoleInvite"]
+  config.resources += [ "Organization", "UsersRole", "Role", "UsersRoleInvite" ]
+  config.resources += [ "UserPreference" ]
+  config.resources += [ "Recipe" ]
+  config.resources += [ "Ingredient" ]
+  config.resources += [ "RecipeIngredient" ]
+  config.resources += [ "MealPlan" ]
+  config.resources += [ "MealPlanItem" ]
+  config.resources += [ "Rating" ]
+  config.resources += [ "ShoppingListItem" ]
+  config.resources += [ "Pantry" ]
 end

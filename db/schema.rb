@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_11_21_165718) do
+ActiveRecord::Schema[8.0].define(version: 2025_11_21_165900) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -85,16 +85,122 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_21_165718) do
     t.index ["sluggable_type"], name: "index_friendly_id_slugs_on_sluggable_type"
   end
 
+  create_table "ingredients", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.string "name", null: false
+    t.string "unit", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organization_id", "name"], name: "index_ingredients_on_organization_id_and_name", unique: true
+    t.index ["organization_id"], name: "index_ingredients_on_organization_id"
+  end
+
+  create_table "meal_plan_items", force: :cascade do |t|
+    t.bigint "meal_plan_id", null: false
+    t.bigint "recipe_id", null: false
+    t.datetime "scheduled_date", null: false
+    t.string "meal_type", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["meal_plan_id", "recipe_id", "scheduled_date", "meal_type"], name: "idx_meal_plan_item_unique_recipe_per_meal_time", unique: true
+    t.index ["meal_plan_id"], name: "index_meal_plan_items_on_meal_plan_id"
+    t.index ["recipe_id"], name: "index_meal_plan_items_on_recipe_id"
+  end
+
+  create_table "meal_plans", force: :cascade do |t|
+    t.bigint "individual_user_id", null: false
+    t.bigint "organization_id", null: false
+    t.datetime "start_date", null: false
+    t.datetime "end_date", null: false
+    t.string "plan_name", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["individual_user_id"], name: "index_meal_plans_on_individual_user_id"
+    t.index ["organization_id"], name: "index_meal_plans_on_organization_id"
+  end
+
   create_table "organizations", force: :cascade do |t|
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
 
+  create_table "pantries", force: :cascade do |t|
+    t.bigint "individual_user_id", null: false
+    t.bigint "ingredient_id", null: false
+    t.bigint "organization_id", null: false
+    t.float "quantity", null: false
+    t.string "unit", null: false
+    t.datetime "expiration_date"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["individual_user_id", "ingredient_id"], name: "index_pantries_on_individual_user_id_and_ingredient_id", unique: true
+    t.index ["individual_user_id"], name: "index_pantries_on_individual_user_id"
+    t.index ["ingredient_id"], name: "index_pantries_on_ingredient_id"
+    t.index ["organization_id"], name: "index_pantries_on_organization_id"
+  end
+
+  create_table "ratings", force: :cascade do |t|
+    t.bigint "individual_user_id", null: false
+    t.bigint "recipe_id", null: false
+    t.bigint "organization_id", null: false
+    t.integer "score", null: false
+    t.text "feedback", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["individual_user_id", "recipe_id"], name: "index_ratings_on_individual_user_id_and_recipe_id", unique: true
+    t.index ["individual_user_id"], name: "index_ratings_on_individual_user_id"
+    t.index ["organization_id"], name: "index_ratings_on_organization_id"
+    t.index ["recipe_id"], name: "index_ratings_on_recipe_id"
+  end
+
+  create_table "recipe_ingredients", force: :cascade do |t|
+    t.bigint "recipe_id", null: false
+    t.bigint "ingredient_id", null: false
+    t.float "quantity", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["ingredient_id"], name: "index_recipe_ingredients_on_ingredient_id"
+    t.index ["recipe_id", "ingredient_id"], name: "index_recipe_ingredients_on_recipe_id_and_ingredient_id", unique: true
+    t.index ["recipe_id"], name: "index_recipe_ingredients_on_recipe_id"
+  end
+
+  create_table "recipes", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.string "name", null: false
+    t.text "description", null: false
+    t.text "instructions", null: false
+    t.float "prep_time_minutes"
+    t.float "cook_time_minutes"
+    t.integer "servings", null: false
+    t.string "cuisine_type"
+    t.string "meal_type"
+    t.text "nutritional_info"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organization_id", "name"], name: "index_recipes_on_organization_id_and_name", unique: true
+    t.index ["organization_id"], name: "index_recipes_on_organization_id"
+  end
+
   create_table "roles", force: :cascade do |t|
     t.string "name", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "shopping_list_items", force: :cascade do |t|
+    t.bigint "individual_user_id", null: false
+    t.bigint "ingredient_id", null: false
+    t.bigint "organization_id", null: false
+    t.float "quantity", null: false
+    t.string "unit", null: false
+    t.boolean "is_purchased", default: false, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["individual_user_id", "ingredient_id"], name: "idx_on_individual_user_id_ingredient_id_6e2981f55c", unique: true
+    t.index ["individual_user_id"], name: "index_shopping_list_items_on_individual_user_id"
+    t.index ["ingredient_id"], name: "index_shopping_list_items_on_ingredient_id"
+    t.index ["organization_id"], name: "index_shopping_list_items_on_organization_id"
   end
 
   create_table "solid_cable_messages", force: :cascade do |t|
@@ -239,6 +345,18 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_21_165718) do
     t.index ["key"], name: "index_solid_queue_semaphores_on_key", unique: true
   end
 
+  create_table "user_preferences", force: :cascade do |t|
+    t.bigint "individual_user_id", null: false
+    t.bigint "organization_id", null: false
+    t.string "preference_type", null: false
+    t.string "preference_value", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["individual_user_id", "preference_type"], name: "idx_on_individual_user_id_preference_type_15fdf3c2cc", unique: true
+    t.index ["individual_user_id"], name: "index_user_preferences_on_individual_user_id"
+    t.index ["organization_id"], name: "index_user_preferences_on_organization_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "provider", default: "email", null: false
     t.string "uid", default: "", null: false
@@ -301,12 +419,31 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_21_165718) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "ingredients", "organizations"
+  add_foreign_key "meal_plan_items", "meal_plans"
+  add_foreign_key "meal_plan_items", "recipes"
+  add_foreign_key "meal_plans", "organizations"
+  add_foreign_key "meal_plans", "users", column: "individual_user_id"
+  add_foreign_key "pantries", "ingredients"
+  add_foreign_key "pantries", "organizations"
+  add_foreign_key "pantries", "users", column: "individual_user_id"
+  add_foreign_key "ratings", "organizations"
+  add_foreign_key "ratings", "recipes"
+  add_foreign_key "ratings", "users", column: "individual_user_id"
+  add_foreign_key "recipe_ingredients", "ingredients"
+  add_foreign_key "recipe_ingredients", "recipes"
+  add_foreign_key "recipes", "organizations"
+  add_foreign_key "shopping_list_items", "ingredients"
+  add_foreign_key "shopping_list_items", "organizations"
+  add_foreign_key "shopping_list_items", "users", column: "individual_user_id"
   add_foreign_key "solid_queue_blocked_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_claimed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_failed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_ready_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_recurring_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_scheduled_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
+  add_foreign_key "user_preferences", "organizations"
+  add_foreign_key "user_preferences", "users", column: "individual_user_id"
   add_foreign_key "users_role_invites", "organizations"
   add_foreign_key "users_role_invites", "roles"
   add_foreign_key "users_roles", "organizations"
